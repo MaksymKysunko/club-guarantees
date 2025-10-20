@@ -1,8 +1,11 @@
+import os
 from sqlmodel import create_engine, Session
 from app.core.config import settings
 
-engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread": False})
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/club.db")  # ← так
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
 def get_session():
-    with Session(engine) as s:
-        yield s
+    with Session(engine) as session:
+        yield session
+
