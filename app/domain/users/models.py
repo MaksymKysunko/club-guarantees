@@ -10,3 +10,4 @@ class User(SQLModel, table=True):
     role_id: int = Field(foreign_key="role.id", index=True)
     is_active: bool = False
     created_at: datetime = Field(default_factory=datetime.utcnow)
+

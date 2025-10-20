@@ -8,6 +8,6 @@ def add(session: Session, role: Role) -> Role:
     session.add(role); session.commit(); session.refresh(role); return role
 
 def ensure_seed(session: Session):
-    for code, name in [("banker", "Banker"), ("member", "Member")]:
+    for code, name in [("admin","Admin"), ("banker","Banker"), ("member","Member")]:
         if not get_by_code(session, code):
             add(session, Role(code=code, name=name, description=f"Default role: {name}", is_system=True))
