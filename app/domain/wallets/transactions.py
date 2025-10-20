@@ -1,34 +1,39 @@
 from typing import Optional
 from datetime import datetime
 from sqlmodel import SQLModel, Field
+from sqlalchemy import CheckConstraint
 
 class WalletTransaction(SQLModel, table=True):
+    """
+    Журнал змін гаманця:
+      - amount_posted  -> впливає на баланс/сальдо
+      - amount_reserved-> впливає на резерв (блокування)
+    Обов'язковий кореспондентський гаманець (club/member/інший wallet).
+    """
     __tablename__ = "wallet_transaction"
+    __table_args__ = (
+        CheckConstraint("(amount_posted <> 0) OR (amount_reserved <> 0)", name="ck_wtx_nonzero"),
+        CheckConstraint("length(currency) > 0", name="ck_wtx_currency_nonempty"),
+    )
 
     id: Optional[int] = Field(default=None, primary_key=True)
 
-    # базова прив'язка
+    # чий гаманець змінюється
     wallet_id: int = Field(foreign_key="wallet.id", index=True)
-    currency: str  # очікувана відповідність wallet.currency
 
-    # тип операції (єдина шкала для всього, що впливає на гаманець)
-    tx_type: str  # приклади: deposit_approved, reserve_create, reserve_release, reserve_confiscate, adjust_credit, adjust_debit
+    # валюта рядка
+    currency: str
 
-    # сума операції (як її декларував ініціатор)
-    amount: float
+    # рухи (знакові; >0 приплив/блок, <0 відтік/розблок)
+    amount_posted: float = 0.0
+    amount_reserved: float = 0.0
 
-    # фактичний вплив на агрегати гаманця (дельти-кеш)
-    balance_delta: float = 0.0   # +/- змінює balance
-    reserved_delta: float = 0.0  # +/- змінює reserved
+    # кореспондентський гаманець (NOT NULL)
+    corresponding_wallet_id: int = Field(foreign_key="wallet.id", index=True)
 
-    # опційні зв'язки (для угод/компенсацій)
-    deal_id: Optional[int] = Field(default=None, foreign_key="deal.id")
-    participant_id: Optional[int] = Field(default=None, foreign_key="deal_participant.id")
-    counterparty_wallet_id: Optional[int] = Field(default=None, foreign_key="wallet.id")
+    # прив'язка до угоди (обов'язкова для резерв/реліз/конфіскації; умовне правило — на рівні бізнес-логіки)
+    deal_id: Optional[int] = Field(default=None, foreign_key="deal.id", index=True)
 
-    # службове
-    note: Optional[str] = None
-    status: str = Field(default="posted")  # наприклад: posted|pending (деталізуємо пізніше)
+    # часи
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    posted_at: Optional[datetime] = None
-    actor_user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    changed_at: datetime = Field(default_factory=datetime.utcnow)

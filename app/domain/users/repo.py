@@ -1,11 +1,13 @@
 from sqlmodel import Session, select
-from .models import User
+from .models import Role
 
-def get_by_email(session: Session, email: str) -> User | None:
-    return session.exec(select(User).where(User.email == email)).first()
+def get_by_code(session: Session, code: str) -> Role | None:
+    return session.exec(select(Role).where(Role.code == code)).first()
 
-def add(session: Session, user: User) -> User:
-    session.add(user); session.commit(); session.refresh(user); return user
+def add(session: Session, role: Role) -> Role:
+    session.add(role); session.commit(); session.refresh(role); return role
 
-def get(session: Session, user_id: int) -> User | None:
-    return session.get(User, user_id)
+def ensure_seed(session: Session):
+    for code, name in [("admin","Admin"), ("banker","Banker"), ("member","Member")]:
+        if not get_by_code(session, code):
+            add(session, Role(code=code, name=name, description=f"Default role: {name}", is_system=True))
