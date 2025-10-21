@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -20,8 +19,7 @@ RUN python -m pip install --upgrade pip && \
 
 # код
 COPY app ./app
-COPY data ./data  # порожня папка для sqlite (буде перекрита томом)
-# якщо є інші каталоги (app/api, app/domain — вони вже в /app/app)
+COPY data ./data
 
 EXPOSE 8000
 ENV DATABASE_URL=sqlite:///./data/club.db

@@ -1,39 +1,13 @@
-version: "3.9"
-
 services:
   app:
-    image: ghcr.io/YOUR_GH_USER/club:latest   # ← якщо робиш CI/CD; або build локально:
-    # build: .                                 # ← для ручного білду замість image
+    build: .
     restart: unless-stopped
     environment:
       - DATABASE_URL=sqlite:///./data/club.db
     volumes:
-      - club_data:/app/data    # збереження БД/даних
-    networks:
-      - web
-
-  caddy:
-    image: caddy:2
-    restart: unless-stopped
+      - club_data:/app/data
     ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      - DOMAIN=club.example.com        # ← підстав свій домен
-    volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-    depends_on:
-      - app
-    networks:
-      - web
+      - "8000:8000"
 
 volumes:
   club_data:
-  caddy_data:
-  caddy_config:
-
-networks:
-  web:
-    driver: bridge
