@@ -21,6 +21,7 @@ RUN python -m pip install --upgrade pip && \
 COPY app ./app
 COPY data ./data
 
+
 EXPOSE 8000
 ENV DATABASE_URL=sqlite:///./data/club.db
 
