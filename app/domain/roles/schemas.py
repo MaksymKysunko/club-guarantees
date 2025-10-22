@@ -9,3 +9,4 @@ class RoleRead(BaseModel):
     description: Optional[str]
     is_system: bool
     created_at: datetime
+ 

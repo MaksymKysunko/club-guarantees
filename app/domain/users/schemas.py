@@ -14,6 +14,7 @@ class UserRead(BaseModel):
     role_id: int
     is_active: bool
     created_at: datetime
+    role_code: str = ""   # дефолт, щоб не валилось, якщо десь не підставили
 
 class RoleChange(BaseModel):
     role_code: str  # "admin" | "member" | "banker"

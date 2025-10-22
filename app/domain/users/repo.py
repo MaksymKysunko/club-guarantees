@@ -4,7 +4,9 @@ from app.domain.roles.repo import get_by_code
 
 from sqlalchemy import func
 from sqlmodel import Session, select
-from .models import User
+from .schemas import UserRead
+from app.domain.roles.models import Role
+from typing import List
 
 def count_all(session: Session) -> int:
     # коректний COUNT(*) у стилі SQLAlchemy 2.0
@@ -42,3 +44,22 @@ def find_user_with_role(session: Session, role_code: str) -> User | None:
     role = get_by_code(session, role_code)
     if not role: return None
     return session.exec(select(User).where(User.role_id == role.id)).first()
+
+def list_all_with_roles(session: Session) -> List[UserRead]:
+    rows = session.exec(
+        select(User, Role.code).join(Role, Role.id == User.role_id)
+    ).all()
+    out: list[UserRead] = []
+    for u, code in rows:
+        out.append(
+            UserRead(
+                id=u.id,
+                email=u.email,
+                nick=u.nick,
+                is_active=u.is_active,
+                role_id=u.role_id,
+                created_at=u.created_at,
+                role_code=code or ""
+            )
+        )
+    return out
