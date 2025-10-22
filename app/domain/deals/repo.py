@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple
 from sqlmodel import Session, select, func
-from .models import Deal, DealParticipant
+from .models import Deal, DealParticipant, DealAction
+
 
 def add_deal(session: Session, d: Deal) -> Deal:
     session.add(d)
@@ -38,4 +39,25 @@ def list_my_deals(session: Session, user_id: int) -> List[Tuple[Deal, int]]:
 
 def list_participants(session: Session, deal_id: int) -> List[DealParticipant]:
     stmt = select(DealParticipant).where(DealParticipant.deal_id == deal_id).order_by(DealParticipant.id)
+    return session.exec(stmt).all()
+
+def get_participant(session: Session, deal_id: int, user_id: int) -> Optional[DealParticipant]:
+    stmt = select(DealParticipant).where(
+        DealParticipant.deal_id == deal_id,
+        DealParticipant.user_id == user_id
+    )
+    return session.exec(stmt).first()
+
+def list_actions(session: Session, deal_id: int) -> List[DealAction]:
+    stmt = select(DealAction).where(DealAction.deal_id == deal_id).order_by(DealAction.created_at)
+    return session.exec(stmt).all()
+
+def add_action(session: Session, a: DealAction) -> DealAction:
+    session.add(a)
+    session.commit()
+    session.refresh(a)
+    return a
+
+def list_all_participants(session: Session, deal_id: int) -> List[DealParticipant]:
+    stmt = select(DealParticipant).where(DealParticipant.deal_id == deal_id)
     return session.exec(stmt).all()

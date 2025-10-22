@@ -35,3 +35,12 @@ class ParticipantRead(SQLModel):
     terms_accepted: bool
     done_confirmed: bool
 
+class DealActionCreate(SQLModel):
+    description: str = Field(min_length=1, max_length=500)
+
+class DealActionRead(SQLModel):
+    id: int
+    deal_id: int
+    description: str
+    creator_id: int
+    created_at: datetime
