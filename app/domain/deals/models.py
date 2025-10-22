@@ -29,3 +29,4 @@ class DealAction(SQLModel, table=True):
     description: str
     creator_id: int = Field(foreign_key="user.id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
